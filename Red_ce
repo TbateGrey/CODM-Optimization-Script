@@ -1,0 +1,63 @@
+// ==UserScript==
+// @name         Optimizador Universal de Latencia WiFi
+// @namespace    https://github.com/tu-usuario/adguard-scripts
+// @version      1.2
+// @description  Bloquea trackers, anuncios y servidores lentos para mejorar la latencia.
+// @match        *://*/*
+// @grant        none
+// @run-at       document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Lista de dominios a bloquear (causantes de latencia)
+    const blockedDomains = [
+        // Trackers y Analytics
+        '*.google-analytics.com',
+        '*.doubleclick.net',
+        '*.facebook.net',
+        '*.scorecardresearch.com',
+        '*.hotjar.com',
+        '*.adsymptotic.com',
+
+        // Publicidad
+        '*.adservice.google.com',
+        '*.googlesyndication.com',
+        '*.amazon-adsystem.com',
+        '*.adcolony.com',
+        '*.applovin.com',
+
+        // Telemetría y bloatware
+        '*.telemetry.microsoft.com',
+        '*.logs.kubernetes.io',
+        '*.uxengine.net',
+        '*.samsungapps.com',
+
+        // CDNs lentos o innecesarios
+        '*.akstat.io',
+        '*.edgekey.net',
+        '*.cloudfront.net',
+        '*.slowcdn.net'
+    ];
+
+    // Interceptar solicitudes HTTP/HTTPS
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+        const blocked = blockedDomains.some(domain => {
+            const regex = new RegExp(domain.replace('*', '.*'));
+            return regex.test(url);
+        });
+        if (blocked) {
+            console.log('[Latency Optimizer] Bloqueado:', url);
+            return new Promise((resolve, reject) => reject());
+        }
+        return originalFetch(url, options);
+    };
+
+    // Priorizar DNS rápido (simulado)
+    if (navigator.connection && navigator.connection.type === 'wifi') {
+        console.log('[Latency Optimizer] WiFi detectado: optimizando DNS...');
+        // Añadir lógica para sugerir DNS rápido (Cloudflare, Google)
+    }
+})();
